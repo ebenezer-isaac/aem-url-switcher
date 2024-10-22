@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <title>AEM URL Switcher</title>
+  </head>
+  <body class="popup-body">
+    <div class="popup-container">
+      <div class="popup-header">
+        <img src='logo.png' style='max-width:100px;'/>
+        <h3 class="popup-title">AEM URL Switcher</h3>
+      </div>
+      <div class="popup-content">
+        <h3>Current Page Type: <span id="page-type">Loading...</span></h3>
+        <button id="switch-btn" class="material-button">
+          <span class="material-icons">swap_horiz</span>
+          <span id="switch-btn-text">Switch</span>
+        </button>
+      </div>
+      <div class="popup-footer">
+        <button id="settings-btn" class="material-button">
+          <span class="material-icons" style='margin-right:0px'>settings</span>
+        </button>
+      </div>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>
