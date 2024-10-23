@@ -1,35 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <title>AEM URL Switcher - Settings</title>
-  </head>
-  <body class="settings-body">
-    <div class="settings-container">
-      <img src='logo.png' style='max-width:100px;text-align:center'/>
-      <h2 class="settings-title">AEM URL Switcher Settings</h2>
-      <div class="settings-form">
-        <h3>URL Switch Shortcut:</h3>
-        <input id="shortcut" type="text" class="material-input" value="Ctrl+Alt+P" disabled />
+<head>
+  <meta charset="UTF-8">
+  <title>AEM URL Switcher - Settings</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="settings-body">
+  <div class="settings-container">
+    <img src="logo.png" alt="Logo" class="logo">
+    <h2 class="settings-title">AEM URL Switcher Settings</h2>
 
-        <h3>Manage Servers</h3>
-        <div id="server-list">
-          <ul id="servers" class="server-list"></ul>
-        </div>
+    <div class="settings-form">
+      <h3>URL Switch Shortcuts:</h3>
+      <ul>
+        <li>Switch to Editor: <strong>Ctrl+Shift+E</strong></li>
+        <li>Switch to Publish: <strong>Ctrl+Shift+F</strong></li>
+        <li>Switch to CRX DE: <strong>Ctrl+Shift+Q</strong></li>
+      </ul>
 
-        <div class="server-inputs">
-          <input id="nickname" type="text" class="material-input" placeholder="Nickname" />
-          <input id="url" type="text" class="material-input" placeholder="Server URL" />
-        </div>
+      <h3>Manage Servers</h3>
+      <div id="server-list">
+        <!-- Server list will be populated here -->
+      </div>
 
+      <div class="server-inputs">
+        <input id="nickname" type="text" class="material-input" placeholder="Nickname" />
+        <input id="url" type="text" class="material-input" placeholder="Server URL (e.g., http://localhost:4502)" />
         <button id="add-server" class="material-button">
           <span class="material-icons">add_circle</span> Add Server
         </button>
-      </div>
+      </div>      
     </div>
-    <script src="settings.js"></script>
-  </body>
+  </div>
+  <script src="settings.js"></script>
+</body>
 </html>

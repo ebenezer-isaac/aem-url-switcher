@@ -5,7 +5,10 @@ A Chrome extension to switch between AEM editor and publish URLs and manage mult
 ## Features
 1. **Switch URLs**: Quickly switch between editor and publish versions of AEM pages.
 2. **Multiple Servers**: Manage and switch between multiple server environments.
-3. **Keyboard Shortcuts**: Configure shortcuts for switching URLs and accessing servers.
+3. **Keyboard Shortcuts**: Use shortcuts to switch modes on the fly.
+  - Switch to Editor: `Ctrl+Shift+E`
+  - Switch to Publish: `Ctrl+Shift+P`
+  - Switch to CRX DE: `Ctrl+Shift+C`
 
 ## Installation
 1. Clone this repository: `git clone https://github.com/your-repo/aem-url-switcher.git`

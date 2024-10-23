@@ -1,26 +1,41 @@
 {
-    "manifest_version": 3,
     "name": "AEM URL Switcher",
     "version": "1.0",
-    "description": "Quickly switch between editor and publish pages in AEM and manage multiple server URLs.",
+    "description": "Switch between AEM Editor, Publish, and CRX DE environments and manage multiple servers.",
+    "manifest_version": 3,
+    "permissions": ["activeTab", "storage", "scripting"],
     "action": {
         "default_popup": "popup.html",
-        "default_icon": "logo.png"
-    },
-    "commands": {
-        "_execute_action": {
-            "suggested_key": {
-                "default": "Ctrl+Shift+P",
-                "mac": "Command+Shift+P"
-            },
-            "description": "Switch between editor and publish pages"
+        "default_icon": {
+            "16": "logo.png",
+            "48": "logo.png",
+            "128": "logo.png"
         }
     },
-    "permissions": [
-        "storage",
-        "tabs"
-    ],
+    "commands": {
+        "switch_to_editor": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+E"
+            },
+            "description": "Switch to Editor mode"
+        },
+        "switch_to_publish": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+F"
+            },
+            "description": "Switch to Publish mode"
+        },
+        "switch_to_crxde": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+Q"
+            },
+            "description": "Switch to CRX DE"
+        }
+    },
     "options_page": "settings.html",
+    "background": {
+        "service_worker": "background.js"
+    },
     "icons": {
         "16": "logo.png",
         "48": "logo.png",
