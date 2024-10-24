@@ -10,17 +10,11 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
                 let currentPath = tabs[0].url;
-                let isValidServerPage = false;
+
                 servers.forEach((server, index) => {
-                    console.log(currentPath, server.url)
-                    console.log(currentPath.includes(server.url));
-                    if (currentPath.includes(server.url)) {
-                        isValidServerPage = true;
-                    }
-                });
-                console.log(isValidServerPage);
-                servers.forEach((server, index) => {
-                    addServerToPopup(server, index, isValidServerPage);
+                    let isCurrentServerPage = currentPath.includes(server.url);
+
+                    addServerToPopup(server, index, isCurrentServerPage, currentPath);
                 });
             });
         }
@@ -30,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
         chrome.runtime.openOptionsPage();
     });
 
-    function addServerToPopup(server, index, isValidServerPage) {
+    function addServerToPopup(server, index, isCurrentServerPage, currentPath) {
         const serverDiv = document.createElement('div');
         serverDiv.classList.add('server-entry');
 
@@ -41,9 +35,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const buttonContainer = document.createElement('div');
         buttonContainer.classList.add('button-container');
 
-        const editorBtn = createModeButton('edit', 'Editor', server.url);
-        const publishBtn = createModeButton('public', 'Publish', server.url);
-        const crxdeBtn = createModeButton('code', 'CRXDE', server.url);
+        const editorBtn = createModeButton('edit', 'Editor', server.url, `editor-${index}`);
+        const publishBtn = createModeButton('public', 'Publish', server.url, `publish-${index}`);
+        const crxdeBtn = createModeButton('code', 'CRXDE', server.url, `crxde-${index}`);
 
         buttonContainer.appendChild(editorBtn);
         buttonContainer.appendChild(publishBtn);
@@ -52,36 +46,26 @@ document.addEventListener('DOMContentLoaded', function() {
         serverDiv.appendChild(buttonContainer);
         serverListElem.appendChild(serverDiv);
 
-        // Disable and highlight the button for the current mode
-        if (isValidServerPage) {
-            chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-                const activeTabUrl = tabs[0].url;
-                if (isCurrentServer(activeTabUrl, server.url)) {
-                    if (isCurrentMode(activeTabUrl, 'Editor')) {
-                        editorBtn.classList.add('disabled', 'active');
-                        editorBtn.disabled = true;
-                    } else if (isCurrentMode(activeTabUrl, 'Publish')) {
-                        publishBtn.classList.add('disabled', 'active');
-                        publishBtn.disabled = true;
-                    } else if (isCurrentMode(activeTabUrl, 'CRXDE')) {
-                        crxdeBtn.classList.add('disabled', 'active');
-                        crxdeBtn.disabled = true;
-                    }
-                }
-            });
-        } else {
-            editorBtn.classList.add('disabled', 'active');
-            editorBtn.disabled = true;
-            publishBtn.classList.add('disabled', 'active');
-            publishBtn.disabled = true;
-            crxdeBtn.classList.add('disabled', 'active');
-            crxdeBtn.disabled = true;
+        // Disable and highlight buttons based on the current page and mode
+        if (isCurrentServerPage) {
+            // Only disable buttons for the current server
+            if (isCurrentMode(currentPath, 'Editor')) {
+                editorBtn.classList.add('disabled', 'active');
+                editorBtn.disabled = true;
+            } else if (isCurrentMode(currentPath, 'Publish')) {
+                publishBtn.classList.add('disabled', 'active');
+                publishBtn.disabled = true;
+            } else if (isCurrentMode(currentPath, 'CRXDE')) {
+                crxdeBtn.classList.add('disabled', 'active');
+                crxdeBtn.disabled = true;
+            }
         }
     }
 
-    function createModeButton(iconName, mode, baseUrl) {
+    function createModeButton(iconName, mode, baseUrl, uniqueId) {
         const btn = document.createElement('button');
         btn.classList.add('material-button', 'small-button');
+        btn.id = uniqueId; // Assign unique ID to button
         btn.innerHTML = `<span class="material-icons">${iconName}</span>`;
         btn.addEventListener('click', () => switchMode(baseUrl, mode));
         return btn;
@@ -89,37 +73,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function switchMode(baseUrl, mode) {
         chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-            let currentPath = tabs[0].url
+            let currentPath = tabs[0].url;
 
             currentPath = currentPath.split('://')[1].split('/');
+            currentPath.shift(); // remove the protocol part
 
-            currentPath.shift();
+            currentPath = "/" + currentPath.join("/");
 
-            currentPath = "/" + currentPath.join("/")
-            console.log(currentPath)
-                // Remove '/editor.html', '/editor/' or '/crx/de/index.jsp#' from the path
-            currentPath = currentPath.replace(/\/editor\.html|\/editor\//, '/'); // Remove '/editor.html' or '/editor/'
-            currentPath = currentPath.replace(/\/crx\/de\/index\.jsp#/, '/'); // Remove '/crx/de/index.jsp#'
-
-            // Remove any trailing '.html' or '.html?wcmmode=disabled'
+            // Remove mode-specific parts of the URL
+            currentPath = currentPath.replace(/\/editor\.html|\/editor\//, '/');
+            currentPath = currentPath.replace(/\/crx\/de\/index\.jsp#/, '/');
             currentPath = currentPath.replace(/(\.html)(\?wcmmode=disabled)?/, '');
 
-            // Ensure there is only one leading slash
-            currentPath = currentPath.replace(/^\/+/, '/'); // Ensure the path starts with one '/'
-
+            // Build the new URL for the selected mode
             let newUrl = '';
-
-            // Handle different modes
             if (mode === 'Editor') {
-                newUrl = `${baseUrl}/editor.html${currentPath}.html`; // Editor mode should append .html
+                newUrl = `${baseUrl}/editor.html${currentPath}.html`;
             } else if (mode === 'Publish') {
-                newUrl = `${baseUrl}${currentPath}.html?wcmmode=disabled`; // Publish mode appends '.html?wcmmode=disabled'
+                newUrl = `${baseUrl}${currentPath}.html?wcmmode=disabled`;
             } else if (mode === 'CRXDE') {
-                newUrl = `${baseUrl}/crx/de/index.jsp#${currentPath}`; // CRXDE requires '#'
+                newUrl = `${baseUrl}/crx/de/index.jsp#${currentPath}`;
             }
 
-            // Ensure there is no double slashes in the final URL
-            newUrl = newUrl.replace(/([^:]\/)\/+/g, '$1'); // Replace any occurrence of double slashes, excluding the protocol part
+            newUrl = newUrl.replace(/([^:]\/)\/+/g, '$1'); // Fix double slashes
 
             chrome.tabs.create({ url: newUrl });
         });
@@ -134,9 +110,5 @@ document.addEventListener('DOMContentLoaded', function() {
             return true;
         }
         return false;
-    }
-
-    function isCurrentServer(url, serverUrl) {
-        return url.includes(serverUrl);
     }
 });

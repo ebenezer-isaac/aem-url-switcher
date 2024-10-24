@@ -1,124 +1,173 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const serverListElem = document.getElementById('server-list');
-    const addServerBtn = document.getElementById('add-server');
+document.addEventListener('DOMContentLoaded', () => {
+    const serverList = document.getElementById('server-list');
     const nicknameInput = document.getElementById('nickname');
     const urlInput = document.getElementById('url');
+    const addServerButton = document.getElementById('add-server');
+    let editIndex = null; // To track which server is being edited
 
-    // Load servers from storage
-    loadServers();
+    // Available colors
+    const colors = [
+        { name: 'Red', value: '#FF5733' },
+        { name: 'Green', value: '#33FF57' },
+        { name: 'Blue', value: '#5733FF' },
+        { name: 'Yellow', value: '#FFC300' },
+        { name: 'Light Green', value: '#DAF7A6' },
+        { name: 'Pink', value: '#FF33A6' },
+        { name: 'Cyan', value: '#33FFF2' },
+        { name: 'Orange', value: '#FF8C33' },
+        { name: 'Purple', value: '#333EFF' },
+        { name: 'Lime', value: '#57FF33' }
+    ];
 
-    addServerBtn.addEventListener('click', function() {
-        const nickname = nicknameInput.value.trim();
-        let url = urlInput.value.trim();
+    let selectedColors = [];
 
-        if (!nickname || !url) {
-            alert('Both Nickname and Server URL are required.');
-            return;
-        }
-
-        // Strip ending slash
-        if (url.endsWith('/')) {
-            url = url.slice(0, -1);
-        }
-
-        const urlPattern = /^(http|https):\/\/[^\s$.?#].[^\s]*$/gm;
-        if (!url.match(urlPattern)) {
-            alert('Please enter a valid URL.');
-            return;
-        }
-
-        const newServer = { nickname, url };
-
-        chrome.storage.sync.get('servers', function(data) {
-            const servers = data.servers || [];
-            servers.push(newServer);
-            chrome.storage.sync.set({ servers }, function() {
-                loadServers();
-                nicknameInput.value = '';
-                urlInput.value = '';
-            });
+    // Load servers from storage and populate the UI
+    chrome.storage.sync.get('servers', function(data) {
+        const servers = data.servers || [];
+        servers.forEach((server, index) => {
+            createServerItem(server.nickname, server.url, server.color, index);
         });
     });
 
-    function loadServers() {
-        serverListElem.innerHTML = '';
-        chrome.storage.sync.get('servers', function(data) {
-            const servers = data.servers || [];
-            servers.forEach((server, index) => {
-                addServerToList(server, index);
-            });
-        });
-    }
+    // Function to create a new server item
+    function createServerItem(nickname, url, color = '', index = null) {
+        const serverItem = document.createElement('div');
+        serverItem.classList.add('server-item');
 
-    function addServerToList(server, index) {
-        const serverDiv = document.createElement('div');
-        serverDiv.classList.add('server-item');
+        const nicknameElem = document.createElement('input');
+        nicknameElem.type = 'text';
+        nicknameElem.value = nickname;
+        nicknameElem.classList.add('material-input', 'server-input');
+        nicknameElem.disabled = true;
 
-        const nicknameInput = document.createElement('input');
-        nicknameInput.type = 'text';
-        nicknameInput.value = server.nickname;
-        nicknameInput.classList.add('material-input', 'server-input');
+        const urlElem = document.createElement('input');
+        urlElem.type = 'text';
+        urlElem.value = url;
+        urlElem.classList.add('material-input', 'server-input');
+        urlElem.disabled = true;
 
-        const urlInput = document.createElement('input');
-        urlInput.type = 'text';
-        urlInput.value = server.url;
-        urlInput.classList.add('material-input', 'server-input');
-
-        const saveBtn = document.createElement('button');
-        saveBtn.classList.add('icon-button');
-        saveBtn.innerHTML = '<span class="material-icons">save</span>';
-        saveBtn.addEventListener('click', () => saveServer(index, nicknameInput.value, urlInput.value));
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.classList.add('icon-button');
-        deleteBtn.innerHTML = '<span class="material-icons">delete</span>';
-        deleteBtn.addEventListener('click', () => deleteServer(index));
+        const colorPicker = document.createElement('select');
+        colorPicker.classList.add('material-input', 'server-input');
+        populateColorPicker(colorPicker, color);
 
         const buttonContainer = document.createElement('div');
         buttonContainer.classList.add('server-buttons');
-        buttonContainer.appendChild(saveBtn);
-        buttonContainer.appendChild(deleteBtn);
 
-        serverDiv.appendChild(nicknameInput);
-        serverDiv.appendChild(urlInput);
-        serverDiv.appendChild(buttonContainer);
+        const deleteButton = document.createElement('button');
+        deleteButton.classList.add('icon-button');
+        deleteButton.innerHTML = '<span class="material-icons">delete</span>';
 
-        serverListElem.appendChild(serverDiv);
-    }
+        const editButton = document.createElement('button');
+        editButton.classList.add('icon-button');
+        editButton.innerHTML = '<span class="material-icons">edit</span>';
 
-    function saveServer(index, nickname, url) {
-        if (!nickname || !url) {
-            alert('Nickname and URL cannot be empty.');
-            return;
-        }
+        buttonContainer.appendChild(editButton);
+        buttonContainer.appendChild(deleteButton);
+        serverItem.appendChild(nicknameElem);
+        serverItem.appendChild(urlElem);
+        serverItem.appendChild(colorPicker);
+        serverItem.appendChild(buttonContainer);
+        serverList.appendChild(serverItem);
 
-        // Strip ending slash
-        if (url.endsWith('/')) {
-            url = url.slice(0, -1);
-        }
+        // Event listener for the delete button
+        deleteButton.addEventListener('click', () => {
+            const selectedColor = colorPicker.value;
+            selectedColors = selectedColors.filter(c => c !== selectedColor);
+            serverItem.remove();
+            saveServers();
+            updateAllColorPickers();
+        });
 
-        const urlPattern = /^(http|https):\/\/[^\s$.?#].[^\s]*$/gm;
-        if (!url.match(urlPattern)) {
-            alert('Please enter a valid URL.');
-            return;
-        }
+        // Event listener for the edit button
+        editButton.addEventListener('click', () => {
+            nicknameInput.value = nicknameElem.value;
+            urlInput.value = urlElem.value;
+            editIndex = index;
+            addServerButton.innerHTML = '<span class="material-icons">save</span> &nbsp; Save Changes'; // Change button to "Save Changes"
+        });
 
-        chrome.storage.sync.get('servers', function(data) {
-            const servers = data.servers || [];
-            servers[index] = { nickname, url };
-            chrome.storage.sync.set({ servers }, function() {
-                loadServers();
-            });
+        colorPicker.addEventListener('change', () => {
+            updateAllColorPickers();
+            saveServers();
         });
     }
 
-    function deleteServer(index) {
-        chrome.storage.sync.get('servers', function(data) {
-            const servers = data.servers || [];
-            servers.splice(index, 1);
-            chrome.storage.sync.set({ servers }, function() {
-                loadServers();
-            });
+    // Populate color picker with available colors
+    function populateColorPicker(colorPicker, selectedColor = '') {
+        colorPicker.innerHTML = '';
+        colors.forEach(color => {
+            const option = document.createElement('option');
+            option.value = color.value;
+            option.textContent = color.name;
+            option.style.backgroundColor = color.value;
+            if (selectedColors.includes(color.value)) {
+                option.disabled = true;
+            }
+            colorPicker.appendChild(option);
+        });
+
+        if (selectedColor) {
+            colorPicker.value = selectedColor;
+            selectedColors.push(selectedColor);
+        }
+    }
+
+    // Update all color pickers to reflect available colors
+    function updateAllColorPickers() {
+        const colorPickers = document.querySelectorAll('.server-item select');
+        selectedColors = Array.from(colorPickers).map(picker => picker.value);
+
+        colorPickers.forEach(picker => {
+            const currentColor = picker.value;
+            populateColorPicker(picker);
+            picker.value = currentColor;
         });
     }
+
+    // Save servers to chrome.storage.sync
+    function saveServers() {
+        const servers = [];
+        document.querySelectorAll('.server-item').forEach(item => {
+            const nickname = item.querySelectorAll('input[type="text"]')[0].value;
+            const url = item.querySelectorAll('input[type="text"]')[1].value;
+            const color = item.querySelector('select').value;
+            servers.push({ nickname, url, color });
+        });
+        chrome.storage.sync.set({ servers }, function() {
+            console.log('Servers saved:', servers);
+        });
+    }
+
+    addServerButton.addEventListener('click', () => {
+        const nickname = nicknameInput.value.trim();
+        const url = urlInput.value.trim();
+
+        if (nickname && url) {
+            if (editIndex !== null) {
+                // Edit existing server
+                chrome.storage.sync.get('servers', function(data) {
+                    let servers = data.servers || [];
+                    servers[editIndex] = { nickname, url, color: servers[editIndex].color }; // Keep the current color
+                    chrome.storage.sync.set({ servers }, function() {
+                        // Reset the UI
+                        serverList.innerHTML = '';
+                        servers.forEach((server, index) => {
+                            createServerItem(server.nickname, server.url, server.color, index);
+                        });
+                        // After edits are saved, reset the button text
+                        addServerButton.innerHTML = '<span class="material-icons">add_circle</span> &nbsp; Add Server';
+                        editIndex = null; // Reset edit index
+                    });
+                });
+            } else {
+                // Add new server
+                createServerItem(nickname, url);
+                saveServers();
+            }
+
+            // Clear inputs
+            nicknameInput.value = '';
+            urlInput.value = '';
+        }
+    });
 });

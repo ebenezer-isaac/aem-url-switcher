@@ -194,3 +194,7 @@ li {
 .server-input:first-child {
     max-width: 100px;
 }
+
+select.decorated option:hover {
+    box-shadow: 0 0 10px 100px #ffffff inset;
+}
