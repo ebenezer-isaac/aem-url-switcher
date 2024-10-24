@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function addServerToPopup(server, index, isCurrentServerPage, currentPath) {
         const serverDiv = document.createElement('div');
         serverDiv.classList.add('server-entry');
+        serverDiv.style.backgroundColor = server.color;
+        console.log(server.color)
+        console.log(server)
 
         const nickname = document.createElement('h4');
         nickname.textContent = server.nickname.substring(0, 15); // Limit nickname to 15 characters

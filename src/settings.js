@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'Pink', value: '#FF33A6' },
         { name: 'Cyan', value: '#33FFF2' },
         { name: 'Orange', value: '#FF8C33' },
-        { name: 'Purple', value: '#333EFF' },
+        { name: 'Purple', value: '#9D00FF' },
         { name: 'Lime', value: '#57FF33' }
     ];
 
@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function createServerItem(nickname, url, color = '', index = null) {
         const serverItem = document.createElement('div');
         serverItem.classList.add('server-item');
+        serverItem.style.backgroundColor = color;
 
         const nicknameElem = document.createElement('input');
         nicknameElem.type = 'text';
@@ -87,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         colorPicker.addEventListener('change', () => {
+            serverItem.style.backgroundColor = colorPicker.value;
             updateAllColorPickers();
             saveServers();
         });

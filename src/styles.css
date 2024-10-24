@@ -42,11 +42,22 @@ body {
     color: #3f51b5;
 }
 
+.popup-title {
+    padding: 0.35rem;
+}
+
+.popup-header {
+    display: inline-flex;
+    vertical-align: middle;
+    height: 30px;
+}
+
 .popup-content {
     margin-top: 15px;
 }
 
 .server-entry h4 {
+    margin-top: 0px;
     margin-bottom: 3px;
 }
 
@@ -80,14 +91,19 @@ body {
     width: 100%;
     padding: 8px;
     margin-bottom: 10px;
-    border: 1px solid #ddd;
+    background-color: white;
+    border: grey 1px solid;
     border-radius: 4px;
 }
 
 .server-item {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    background-color: green;
+    padding-left: 1rem;
+    border-radius: 7px;
+    padding-top: .5rem;
+    margin-bottom: 1rem;
 }
 
 .server-input {
@@ -138,12 +154,16 @@ li {
 }
 
 .popup-container .logo {
-    width: 50px;
-    height: 50px;
+    width: 30px;
+    height: 30px;
 }
 
 .server-entry {
-    margin-bottom: 15px;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border: grey solid 1px;
+    border-radius: 7px;
+    text-align: center;
 }
 
 .small-button {
