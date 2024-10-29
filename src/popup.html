@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="popup-body">
-  <div class="popup-container">
+  <div>
     <div class="popup-header">
       <img src="logo.png" alt="Logo" class="logo">
       <h3 class="popup-title">AEM URL Switcher</h3>
@@ -17,13 +17,17 @@
     </div>
 
     <div class="popup-legend">
-      <p><span class="material-icons">edit</span> Editor | <span class="material-icons">public</span> Publish | <span class="material-icons">code</span> CRX </p>
+      <p>
+        <span class="material-icons">edit</span> Editor | 
+        <span class="material-icons">public</span> Publish | 
+        <span class="material-icons">code</span> CRX 
+      </p>
     </div>
 
     <div class="popup-content" id="server-list">
       <!-- Servers will be dynamically added here -->
     </div>
   </div>
-  <script src="popup.js"></script>
+  <script type="module" src="popup.js"></script>
 </body>
 </html>

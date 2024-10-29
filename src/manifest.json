@@ -3,7 +3,7 @@
     "version": "1.0",
     "description": "Switch between AEM Editor, Publish, and CRX DE environments and manage multiple servers.",
     "manifest_version": 3,
-    "permissions": ["activeTab", "storage", "scripting"],
+    "permissions": ["activeTab", "storage", "scripting", "tabGroups"],
     "action": {
         "default_popup": "popup.html",
         "default_icon": {
@@ -21,13 +21,13 @@
         },
         "switch_to_publish": {
             "suggested_key": {
-                "default": "Ctrl+Shift+F"
+                "default": "Ctrl+Shift+Z"
             },
             "description": "Switch to Publish mode"
         },
         "switch_to_crxde": {
             "suggested_key": {
-                "default": "Ctrl+Shift+Q"
+                "default": "Ctrl+Shift+X"
             },
             "description": "Switch to CRX DE"
         }
