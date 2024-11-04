@@ -1,18 +1,30 @@
 import { getServers } from './storage.js';
-import { constructNewUrl } from './popup.js'; // Ensure constructNewUrl is exported
+import { constructNewUrl, getCurrentPath } from './utils.js';
 import { openTabInGroup, createNewTabGroup } from './tabGroup.js';
-import { getCurrentPath } from './popup.js'; // Directly use the pre-defined helper function
 
 chrome.commands.onCommand.addListener(async function(command) {
     try {
         // Get the active tab
         const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        const currentPath = await getCurrentPath(activeTab.url); // Using the pre-defined helper function
+        if (!activeTab || !activeTab.url) {
+            console.error('No active tab with a valid URL found.');
+            return;
+        }
 
-        // Load servers
+        // Extract current path from active tab URL
+        const currentPath = await getCurrentPath(activeTab.url);
+
+        // Load servers from storage
         const servers = await getServers();
         if (Object.keys(servers).length === 0) {
             alert('No servers configured. Please add servers in the extension settings.');
+            return;
+        }
+
+        // Identify the server that matches the active tab URL
+        const server = Object.values(servers).find((server) => activeTab.url.startsWith(server.url));
+        if (!server) {
+            console.error('No matching server found for the current tab URL.');
             return;
         }
 
@@ -26,12 +38,10 @@ chrome.commands.onCommand.addListener(async function(command) {
             mode = 'CRXDE';
         }
 
-        // Construct the new URL using the shared function
-        const baseUrl = servers[0].url;
-        const newUrl = constructNewUrl(baseUrl, currentPath, mode);
+        // Construct the new URL using the matched server's base URL and the mode
+        const newUrl = constructNewUrl(server.url, currentPath, mode);
 
         // Open in an existing or new tab group as necessary
-        const server = servers[0]; // Modify as needed to select a specific server
         if (server.tabGroupId) {
             await openTabInGroup(newUrl, server);
         } else {

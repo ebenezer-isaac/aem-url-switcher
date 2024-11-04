@@ -3,6 +3,7 @@
 import { COLORS } from './constants.js';
 import { createNewTabGroup, openTabInGroup } from './tabGroup.js';
 import { getServers } from './storage.js';
+import { constructNewUrl, getCurrentPath, getCurrentMode } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', async function() {
     const serverListElem = document.getElementById('server-list');
@@ -37,12 +38,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         serverDiv.style.backgroundColor = colorHex;
 
         const nicknameLink = document.createElement('a');
-        nicknameLink.href = server.url; // Set the URL as the href
-        nicknameLink.target = "_blank"; // Optional: opens the link in a new tab
-        nicknameLink.style.textDecoration = "none"; // Optional: removes underline for styling
+        nicknameLink.href = server.url;
+        nicknameLink.target = "_blank";
+        nicknameLink.style.textDecoration = "none";
         const nicknameHeading = document.createElement('h4');
-        nicknameHeading.textContent = server.nickname.substring(0, 15); // Limit to 15 characters if needed
-        nicknameLink.appendChild(nicknameHeading); // Add <h4> inside <a>
+        nicknameHeading.textContent = server.nickname.substring(0, 15);
+        nicknameLink.appendChild(nicknameHeading);
         serverDiv.appendChild(nicknameLink);
 
         const buttonContainer = document.createElement('div');
@@ -83,10 +84,8 @@ document.addEventListener('DOMContentLoaded', async function() {
             newUrl = newUrl.replace(/([^:]\/)\/+/g, '$1');
 
             if (server.tabGroupId) {
-                // Open in existing tab group
                 await openTabInGroup(newUrl, server);
             } else {
-                // Create a new tab group if it doesn't exist
                 await createNewTabGroup(newUrl, server);
             }
         } catch (error) {
@@ -107,49 +106,4 @@ document.addEventListener('DOMContentLoaded', async function() {
         publishBtn.classList.add('disabled', 'active');
         crxdeBtn.classList.add('disabled', 'active');
     }
-
-    function getCurrentMode(url) {
-        if (url.includes('/editor.html')) return 'Editor';
-        if (url.includes('wcmmode=disabled')) return 'Publish';
-        if (url.includes('/crx/de/index.jsp#')) return 'CRXDE';
-        return '';
-    }
-
-    function constructNewUrl(baseUrl, currentPath, mode) {
-        let newUrl = '';
-
-        if (mode === 'Editor') {
-            // Construct Editor mode URL
-            newUrl = `${baseUrl}/editor.html${currentPath}.html`;
-        } else if (mode === 'Publish') {
-            // Construct Publish mode URL with wcmmode=disabled
-            newUrl = `${baseUrl}${currentPath}.html?wcmmode=disabled`;
-        } else if (mode === 'CRXDE') {
-            // Construct CRXDE mode URL with "/crx/de/index.jsp#"
-            newUrl = `${baseUrl}/crx/de/index.jsp#${currentPath}`;
-        }
-
-        return newUrl;
-    }
-
-    async function getCurrentPath() {
-        const [currentTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-        // Extract the URL path without protocol and domain
-        let currentPath = currentTab.url.split('://')[1].split('/');
-        currentPath.shift();
-
-        // Rejoin path and clean up any mode-specific fragments
-        return (
-            '/' +
-            currentPath
-            .join('/')
-            .replace(/^editor\.html\//, '') // Remove "editor.html/" prefix if in Editor mode
-            .replace(/^crx\/de\/index\.jsp#/, '') // Remove "crx/de/index.jsp#" prefix if in CRXDE mode
-            .replace(/\.html(\?wcmmode=disabled)?$/, '') // Remove ".html" and "?wcmmode=disabled" if in Publish mode
-        );
-    }
-
-
-
 });
