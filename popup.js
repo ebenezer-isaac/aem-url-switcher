@@ -117,16 +117,39 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     function constructNewUrl(baseUrl, currentPath, mode) {
         let newUrl = '';
-        if (mode === 'Editor') newUrl = `${baseUrl}/editor.html${currentPath}.html`;
-        if (mode === 'Publish') newUrl = `${baseUrl}${currentPath}.html?wcmmode=disabled`;
-        if (mode === 'CRXDE') newUrl = `${baseUrl}/crx/de/index.jsp#${currentPath}`;
+
+        if (mode === 'Editor') {
+            // Construct Editor mode URL
+            newUrl = `${baseUrl}/editor.html${currentPath}.html`;
+        } else if (mode === 'Publish') {
+            // Construct Publish mode URL with wcmmode=disabled
+            newUrl = `${baseUrl}${currentPath}.html?wcmmode=disabled`;
+        } else if (mode === 'CRXDE') {
+            // Construct CRXDE mode URL with "/crx/de/index.jsp#"
+            newUrl = `${baseUrl}/crx/de/index.jsp#${currentPath}`;
+        }
+
         return newUrl;
     }
 
     async function getCurrentPath() {
         const [currentTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+        // Extract the URL path without protocol and domain
         let currentPath = currentTab.url.split('://')[1].split('/');
         currentPath.shift();
-        return "/" + currentPath.join("/").replace(/\/editor\.html|\/editor\//, '/').replace(/\/crx\/de\/index.jsp#/, '/').replace(/(\.html)(\?wcmmode=disabled)?/, '');
+
+        // Rejoin path and clean up any mode-specific fragments
+        return (
+            '/' +
+            currentPath
+            .join('/')
+            .replace(/^editor\.html\//, '') // Remove "editor.html/" prefix if in Editor mode
+            .replace(/^crx\/de\/index\.jsp#/, '') // Remove "crx/de/index.jsp#" prefix if in CRXDE mode
+            .replace(/\.html(\?wcmmode=disabled)?$/, '') // Remove ".html" and "?wcmmode=disabled" if in Publish mode
+        );
     }
+
+
+
 });
