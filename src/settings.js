@@ -44,7 +44,6 @@ async function handleAddOrEditServer(nicknameInput, urlInput) {
     }
 }
 
-
 async function updateServerDetails(nickname, url, serverId) {
     const servers = await getServers();
     const existingServer = servers[serverId];
@@ -76,5 +75,5 @@ async function refreshServerList() {
     const serverList = document.getElementById('server-list');
     serverList.innerHTML = ''; // Clear existing items
     const servers = await getServers();
-    Object.values(servers).forEach((server) => createServerItem(server));
+    Object.values(servers).forEach((server) => createServerItem(server, servers));
 }

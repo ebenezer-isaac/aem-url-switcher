@@ -42,14 +42,14 @@ export class Server {
 }
 
 // Function to create a server item and manage event listeners
-export async function createServerItem(server) {
+export async function createServerItem(server, servers) {
     const serverItem = document.createElement('div');
     serverItem.classList.add('server-item');
     serverItem.style.backgroundColor = server.color.value || '';
 
     const nicknameElem = createInputElement('text', server.nickname);
     const urlElem = createInputElement('text', server.url);
-    const colorPicker = createColorPicker(server.id, server.color);
+    const colorPicker = createColorPicker(server.id, servers, serverItem);
 
     const buttonContainer = createButtonContainer(
         () => deleteServer(serverItem, server.id),

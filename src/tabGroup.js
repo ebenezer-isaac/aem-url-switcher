@@ -13,7 +13,8 @@ export async function updateTabGroup(serverId) {
         }
 
         // Update the tab group using the server's nickname and color
-        await chrome.tabGroups.update(server.tabGroupId, { title: server.nickname, color: server.color.name });
+        console.log
+        await chrome.tabGroups.update(server.tabGroupId, { title: server.nickname, color: server.color.name.toLowerCase() });
         console.log(`Tab group updated with title: ${server.nickname} and color: ${server.color.name}`);
     } catch (error) {
         console.error("Error updating tab group:", error);
