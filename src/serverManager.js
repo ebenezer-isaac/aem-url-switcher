@@ -1,3 +1,5 @@
+//serverManager.js
+
 import { createColorPicker } from './colorPickers.js';
 import * as Storage from './storage.js';
 

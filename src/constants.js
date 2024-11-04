@@ -1,4 +1,5 @@
 // constants.js
+
 export const COLORS = [
     { name: 'Grey', value: '#DADCE0' },
     { name: 'Blue', value: '#8AB4F8' },

@@ -1,3 +1,5 @@
+//tabGroup.js
+
 import { getServers, updateServer } from './storage.js';
 
 export async function updateTabGroup(serverId) {
@@ -40,12 +42,14 @@ export async function createNewTabGroup(url, server) {
     }
 }
 
-export async function openTabInGroup(url, groupId) {
+export async function openTabInGroup(url, server) {
+    const groupId = server.groupId;
     try {
         const newTab = await chrome.tabs.create({ url: url });
         await chrome.tabs.group({ tabIds: newTab.id, groupId: groupId });
         console.log(`Opened new tab in existing group ID: ${groupId}`);
     } catch (error) {
+        createNewTabGroup(url, server)
         console.error("Error opening tab in group:", error);
     }
 }

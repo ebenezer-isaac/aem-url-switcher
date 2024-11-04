@@ -1,3 +1,5 @@
+//popup.js
+
 import { COLORS } from './constants.js';
 import { createNewTabGroup, openTabInGroup } from './tabGroup.js';
 import { getServers } from './storage.js';
@@ -77,7 +79,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             if (server.tabGroupId) {
                 // Open in existing tab group
-                await openTabInGroup(newUrl, server.tabGroupId);
+                await openTabInGroup(newUrl, server);
             } else {
                 // Create a new tab group if it doesn't exist
                 await createNewTabGroup(newUrl, server);
