@@ -24,33 +24,32 @@ export async function updateTabGroup(serverId) {
 export async function createNewTabGroup(url, server) {
     try {
         const newTab = await chrome.tabs.create({ url: url });
-        // Create a new tab group and assign the tab to it
         const groupId = await chrome.tabs.group({ tabIds: newTab.id });
-
-        // Delay to ensure that the group is created and can be updated reliably
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        // Update the group with the correct color and title
         await chrome.tabGroups.update(groupId, { color: server.color.name.toLowerCase(), title: server.nickname });
-
-        // Save the group ID to the server record
+        alert(groupId)
         server.tabGroupId = groupId;
         await updateServer(server);
-
-        console.log(`New tab group created with title: ${server.nickname} and color: ${server.color.name}`);
     } catch (error) {
+        alert(error)
+        await new Promise(resolve => setTimeout(resolve, 1000));
         console.error("Error creating new tab group:", error);
     }
 }
 
 export async function openTabInGroup(url, server) {
-    const groupId = server.groupId;
+    console.log(url, server, "openTabInGroup");
+    const groupId = server.tabGroupId;
+
     try {
+        // Check if the tab group ID exists
+        await chrome.tabGroups.get(groupId);
+
+        // If the group exists, proceed to open the tab in the existing group
         const newTab = await chrome.tabs.create({ url: url });
         await chrome.tabs.group({ tabIds: newTab.id, groupId: groupId });
         console.log(`Opened new tab in existing group ID: ${groupId}`);
     } catch (error) {
-        createNewTabGroup(url, server)
-        console.error("Error opening tab in group:", error);
+        // If groupId is invalid or does not exist, create a new tab group
+        createNewTabGroup(url, server);
     }
 }

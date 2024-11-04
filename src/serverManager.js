@@ -9,6 +9,7 @@ export class Server {
         this.nickname = nickname;
         this.url = url;
         this.color = color;
+        this.tabGroupId = null;
     }
 
     static generateUniqueId() {
