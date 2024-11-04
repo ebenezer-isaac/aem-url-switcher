@@ -36,9 +36,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         const colorHex = COLORS.find(c => c.name.toLowerCase() === server.color.name.toLowerCase()).value;
         serverDiv.style.backgroundColor = colorHex;
 
-        const nickname = document.createElement('h4');
-        nickname.textContent = server.nickname.substring(0, 15);
-        serverDiv.appendChild(nickname);
+        const nicknameLink = document.createElement('a');
+        nicknameLink.href = server.url; // Set the URL as the href
+        nicknameLink.target = "_blank"; // Optional: opens the link in a new tab
+        nicknameLink.style.textDecoration = "none"; // Optional: removes underline for styling
+        const nicknameHeading = document.createElement('h4');
+        nicknameHeading.textContent = server.nickname.substring(0, 15); // Limit to 15 characters if needed
+        nicknameLink.appendChild(nicknameHeading); // Add <h4> inside <a>
+        serverDiv.appendChild(nicknameLink);
 
         const buttonContainer = document.createElement('div');
         buttonContainer.classList.add('button-container');

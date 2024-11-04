@@ -1,5 +1,6 @@
 import { createServerItem } from './serverManager.js';
 import { getAvailableColor } from './colorPickers.js';
+import { updateTabGroup } from './tabGroup.js';
 import { getServers, saveServers, addServer, updateServer } from './storage.js';
 
 document.addEventListener('DOMContentLoaded', init);
@@ -51,6 +52,7 @@ async function updateServerDetails(nickname, url, serverId) {
         existingServer.nickname = nickname;
         existingServer.url = url;
         await updateServer(existingServer); // Save updated server details
+        await updateTabGroup(serverId);
     }
 }
 

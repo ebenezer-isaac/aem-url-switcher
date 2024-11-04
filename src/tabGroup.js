@@ -26,11 +26,9 @@ export async function createNewTabGroup(url, server) {
         const newTab = await chrome.tabs.create({ url: url });
         const groupId = await chrome.tabs.group({ tabIds: newTab.id });
         await chrome.tabGroups.update(groupId, { color: server.color.name.toLowerCase(), title: server.nickname });
-        alert(groupId)
         server.tabGroupId = groupId;
         await updateServer(server);
     } catch (error) {
-        alert(error)
         await new Promise(resolve => setTimeout(resolve, 1000));
         console.error("Error creating new tab group:", error);
     }
