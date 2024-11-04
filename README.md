@@ -9,8 +9,8 @@ A Chrome extension designed to enhance AEM development by allowing easy switchin
 4. **Tab Groups**: When switching to a mode/server in the extension popup, the page opens in a tab group that reflects the color of the selected server, making it easier to visually distinguish between environments.
 5. **Keyboard Shortcuts**: Speed up your workflow with handy shortcuts to switch modes:
    - **Switch to Editor**: `Ctrl+Shift+E`
-   - **Switch to Publish**: `Ctrl+Shift+P`
-   - **Switch to CRX DE**: `Ctrl+Shift+C`
+   - **Switch to Publish**: `Ctrl+Shift+Z`
+   - **Switch to CRX DE**: `Ctrl+Shift+X`
 
 ## Installation
 1. Clone this repository: `git clone https://github.com/your-repo/aem-url-switcher.git`
