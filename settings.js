@@ -13,6 +13,26 @@ async function init() {
     await refreshServerList(); // Load servers on page load
 
     addServerButton.addEventListener('click', () => handleAddOrEditServer(nicknameInput, urlInput));
+
+    // Fetch current shortcuts and update display on settings page
+    chrome.commands.getAll(commands => {
+        commands.forEach(command => {
+            if (command.name === "_execute_action") return; // Skip internal Chrome command
+            switch (command.name) {
+                case "switch_to_editor":
+                    document.getElementById("editor-shortcut").textContent = command.shortcut || "Not Set";
+                    break;
+                case "switch_to_publish":
+                    document.getElementById("publish-shortcut").textContent = command.shortcut || "Not Set";
+                    break;
+                case "switch_to_crxde":
+                    document.getElementById("crxde-shortcut").textContent = command.shortcut || "Not Set";
+                    break;
+                default:
+                    console.warn(`Unknown command: ${command.name}`);
+            }
+        });
+    });
 }
 
 async function handleAddOrEditServer(nicknameInput, urlInput) {
