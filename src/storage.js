@@ -1,33 +1,29 @@
-// storage.js
-
-// Promise-based wrapper around chrome.storage.sync.get
 export const getServers = () => new Promise((resolve, reject) => {
     chrome.storage.sync.get('servers', (data) => {
-        chrome.runtime.lastError ? reject(chrome.runtime.lastError) : resolve(data.servers || []);
+        chrome.runtime.lastError ? reject(chrome.runtime.lastError) : resolve(data.servers || {});
     });
 });
 
-// Promise-based wrapper around chrome.storage.sync.set
 export const saveServers = (servers) => new Promise((resolve, reject) => {
     chrome.storage.sync.set({ servers }, () => {
         chrome.runtime.lastError ? reject(chrome.runtime.lastError) : resolve();
     });
 });
 
-// Function to handle updating a server in storage
-export const updateServer = async(servers, index, updatedServer) => {
-    servers[index] = updatedServer;
+export const updateServer = async(updatedServer) => {
+    const servers = await getServers();
+    servers[updatedServer.id] = updatedServer;
     await saveServers(servers);
 };
 
-// Function to handle adding a new server to storage
-export const addServer = async(servers, newServer) => {
-    servers.push(newServer);
+export const addServer = async(newServer) => {
+    const servers = await getServers();
+    servers[newServer.id] = newServer;
     await saveServers(servers);
 };
 
-// Function to handle deleting a server from storage
-export const deleteServer = async(servers, index) => {
-    servers.splice(index, 1);
+export const deleteServer = async(serverId) => {
+    const servers = await getServers();
+    delete servers[serverId];
     await saveServers(servers);
 };

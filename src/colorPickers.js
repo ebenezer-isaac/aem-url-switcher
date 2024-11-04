@@ -23,9 +23,7 @@ export function createColorPicker(serverIndex, currentColor, servers, serverItem
             updateOtherColorPickers(servers, selectedColor.name, serverIndex);
 
             // Update the tab group's color if it exists
-            if (servers[serverIndex].tabGroupId) {
-                updateTabGroup(servers[serverIndex].nickname, selectedColor.name, servers[serverIndex].tabGroupId);
-            }
+            updateTabGroup(serverIndex)
         } catch (error) {
             console.error("Error updating color:", error);
         }

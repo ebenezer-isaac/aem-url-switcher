@@ -1,58 +1,66 @@
-// serverManager.js
 import { createColorPicker } from './colorPickers.js';
-import * as Storage from './storage.js'; // Import the storage module
+import * as Storage from './storage.js';
 
 export class Server {
-    constructor(nickname, url, color) {
+    constructor(id, nickname, url, color) {
+        this.id = id || Server.generateUniqueId(); // Unique ID, reused if provided
         this.nickname = nickname;
         this.url = url;
         this.color = color;
     }
 
+    static generateUniqueId() {
+        return `server_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    }
     static async loadServers() {
-        const serversData = await Storage.getServers();
-        return serversData.map(server => new Server(server.nickname, server.url, server.color));
+        const servers = await Storage.getServers();
+        return Object.values(servers).map(
+            serverData => new Server(serverData.id, serverData.nickname, serverData.url, serverData.color)
+        );
     }
 
-    static async saveServers(servers) {
+    static async updateServer(updatedServer) {
+        const servers = await Storage.getServers();
+        servers[updatedServer.id] = updatedServer;
         await Storage.saveServers(servers);
     }
 
-    static async updateServer(servers, index, updatedServer) {
-        await Storage.updateServer(servers, index, updatedServer);
+    static async addServer(newServer) {
+        const servers = await Storage.getServers();
+        servers[newServer.id] = newServer;
+        await Storage.saveServers(servers);
     }
 
-    static async addServer(servers, newServer) {
-        await Storage.addServer(servers, newServer);
-    }
-
-    static async deleteServer(servers, index) {
-        await Storage.deleteServer(servers, index);
+    static async deleteServer(serverId) {
+        const servers = await Storage.getServers();
+        delete servers[serverId];
+        await Storage.saveServers(servers);
     }
 }
 
 // Function to create a server item and manage event listeners
-export function createServerItem(serverList, server, index, servers) {
+export async function createServerItem(server) {
     const serverItem = document.createElement('div');
     serverItem.classList.add('server-item');
     serverItem.style.backgroundColor = server.color.value || '';
 
     const nicknameElem = createInputElement('text', server.nickname);
     const urlElem = createInputElement('text', server.url);
-    const colorPicker = createColorPicker(index, server.color, servers, serverItem); // Call color picker creation
+    const colorPicker = createColorPicker(server.id, server.color);
 
     const buttonContainer = createButtonContainer(
-        () => deleteServer(serverItem, servers),
-        () => handleEdit(nicknameElem, urlElem, index, servers)
+        () => deleteServer(serverItem, server.id),
+        () => handleEdit(nicknameElem, urlElem, server.id, server.color)
     );
 
     serverItem.append(nicknameElem, urlElem, colorPicker, buttonContainer);
-    serverList.appendChild(serverItem);
+    document.getElementById('server-list').appendChild(serverItem);
 }
 
 function createInputElement(type, value) {
     const input = document.createElement('input');
-    Object.assign(input, { type, value, classList: ['material-input', 'server-input'], disabled: true });
+    Object.assign(input, { type, value, disabled: true });
+    input.classList.add('material-input', 'server-input');
     return input;
 }
 
@@ -71,30 +79,32 @@ function createButton(icon, clickHandler) {
     return button;
 }
 
-async function deleteServer(serverItem, servers) {
-    const index = Array.from(document.getElementById('server-list').children).indexOf(serverItem);
-    await Server.deleteServer(servers, index); // Use the new deleteServer method
+async function deleteServer(serverItem, serverId) {
+    await Storage.deleteServer(serverId);
     serverItem.remove();
 }
 
-function handleEdit(nicknameElem, urlElem, index, servers) {
-    document.getElementById('nickname').value = nicknameElem.value;
-    document.getElementById('url').value = urlElem.value;
-    document.getElementById('add-server').innerHTML = '<span class="material-icons">save</span> &nbsp; Save Changes';
+function handleEdit(nicknameElem, urlElem, serverId, color) {
+    const nicknameInput = document.getElementById('nickname');
+    const urlInput = document.getElementById('url');
+    const addServerButton = document.getElementById('add-server');
 
-    // Optionally, enable the input fields for editing
+    nicknameInput.value = nicknameElem.value;
+    urlInput.value = urlElem.value;
+    addServerButton.innerHTML = '<span class="material-icons">save</span> &nbsp; Save Changes';
+
     nicknameElem.disabled = false;
     urlElem.disabled = false;
 
-    // Add a click handler for saving changes
-    document.getElementById('add-server').onclick = async() => {
+    addServerButton.onclick = async() => {
         const updatedServer = new Server(
-            document.getElementById('nickname').value,
-            document.getElementById('url').value, { name: nicknameElem.color.name, value: nicknameElem.color.value } // Update color as well
+            serverId,
+            nicknameInput.value,
+            urlInput.value,
+            color // Retain the original color
         );
-        await Server.updateServer(servers, index, updatedServer);
+        await Storage.updateServer(updatedServer);
 
-        // Refresh server list or any other necessary UI update here
-        location.reload(); // Reload to reflect changes or you can implement a more targeted update
+        location.reload(); // Reload to reflect changes or implement a targeted update
     };
 }

@@ -1,39 +1,46 @@
-// settings.js
 import { createServerItem } from './serverManager.js';
-import { getAvailableColor } from './colorPickers.js'; // Import the function
+import { getAvailableColor } from './colorPickers.js';
 import { Server } from './serverManager.js';
 
 document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
-    const serverList = document.getElementById('server-list');
     const nicknameInput = document.getElementById('nickname');
     const urlInput = document.getElementById('url');
     const addServerButton = document.getElementById('add-server');
-    let editIndex = null;
-    let servers = await Server.loadServers();
+    const servers = await Server.loadServers(); // Load servers here
 
-    servers.forEach((server, index) => createServerItem(serverList, server, index, servers));
+    servers.forEach((server) => createServerItem(server));
 
-    addServerButton.addEventListener('click', () => handleAddServer(nicknameInput, urlInput, editIndex, servers));
+    addServerButton.addEventListener('click', () => handleAddOrEditServer(nicknameInput, urlInput, servers));
 }
 
-async function handleAddServer(nicknameInput, urlInput, editIndex, servers) {
+async function handleAddOrEditServer(nicknameInput, urlInput, servers) {
     const nickname = nicknameInput.value.trim();
     const url = urlInput.value.trim();
 
     if (nickname && url) {
-        editIndex !== null ? await updateServer(nickname, url, servers, editIndex) : await addNewServer(nickname, url, servers);
+        const isEditMode = nicknameInput.dataset.editMode === 'true';
+        if (isEditMode) {
+            const serverId = nicknameInput.dataset.serverId;
+
+            await updateServer(nickname, url, serverId, servers);
+        } else {
+            await addNewServer(nickname, url, servers);
+        }
         nicknameInput.value = '';
         urlInput.value = '';
+        nicknameInput.removeAttribute('data-edit-mode');
+        nicknameInput.removeAttribute('data-server-id');
     } else {
         alert('Please fill in both fields.');
     }
 }
 
-async function updateServer(nickname, url, servers, editIndex) {
-    const updatedServer = new Server(nickname, url, servers[editIndex].color); // Retain the existing color
-    await Server.updateServer(servers, editIndex, updatedServer);
+async function updateServer(nickname, url, serverId, servers) {
+    const updatedServer = new Server(serverId, nickname, url, servers[serverId].color); // Retain the existing color
+    await Server.updateServer(updatedServer);
+    refreshServerList();
 }
 
 async function addNewServer(nickname, url, servers) {
@@ -42,9 +49,16 @@ async function addNewServer(nickname, url, servers) {
         alert('No available colors. Please change existing server colors.');
         return;
     }
-    const newServer = new Server(nickname, url, availableColor);
-    await Server.addServer(servers, newServer);
-    createServerItem(document.getElementById('server-list'), newServer, servers.length, servers);
+    const newServer = new Server(null, nickname, url, availableColor);
+    await Server.addServer(newServer);
+    createServerItem(newServer);
+}
+
+
+function refreshServerList() {
+    const serverList = document.getElementById('server-list');
+    serverList.innerHTML = ''; // Clear existing items
+    Server.loadServers().then((servers) => servers.forEach((server) => createServerItem(server)));
 }
 
 function showFeedback(message) {

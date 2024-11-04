@@ -1,12 +1,12 @@
-import { getServers, saveServers } from './storage.js';
+import { getServers, updateServer } from './storage.js';
 
-export async function updateTabGroup(serverIndex) {
+export async function updateTabGroup(serverId) {
     try {
-        const servers = await getServers(); // Fetch servers from storage
-        const server = servers[serverIndex];
+        const servers = await getServers();
+        const server = servers[serverId];
 
         if (!server || !server.tabGroupId) {
-            console.error("No valid server or tabGroupId found for the provided index.");
+            console.error("No valid server or tabGroupId found for the provided ID.");
             return;
         }
 
@@ -18,27 +18,34 @@ export async function updateTabGroup(serverIndex) {
     }
 }
 
-export async function createNewTabGroup(url, serverIndex) {
+export async function createNewTabGroup(url, server) {
     try {
-        const servers = await getServers(); // Fetch servers from storage
         const newTab = await chrome.tabs.create({ url: url });
-
+        // Create a new tab group and assign the tab to it
         const groupId = await chrome.tabs.group({ tabIds: newTab.id });
 
-        const server = servers[serverIndex];
-        if (server) {
-            // Create the tab group with the server's color and nickname
-            await chrome.tabGroups.update(groupId, { color: server.color.name, title: server.nickname });
+        // Delay to ensure that the group is created and can be updated reliably
+        await new Promise(resolve => setTimeout(resolve, 100));
 
-            // Update the server entry with the new tabGroupId
-            server.tabGroupId = groupId;
+        // Update the group with the correct color and title
+        await chrome.tabGroups.update(groupId, { color: server.color.name.toLowerCase(), title: server.nickname });
 
-            // Save updated servers with the new tabGroupId to chrome.storage.sync
-            await saveServers(servers);
-        } else {
-            console.error("No valid server found for the provided index.");
-        }
+        // Save the group ID to the server record
+        server.tabGroupId = groupId;
+        await updateServer(server);
+
+        console.log(`New tab group created with title: ${server.nickname} and color: ${server.color.name}`);
     } catch (error) {
         console.error("Error creating new tab group:", error);
+    }
+}
+
+export async function openTabInGroup(url, groupId) {
+    try {
+        const newTab = await chrome.tabs.create({ url: url });
+        await chrome.tabs.group({ tabIds: newTab.id, groupId: groupId });
+        console.log(`Opened new tab in existing group ID: ${groupId}`);
+    } catch (error) {
+        console.error("Error opening tab in group:", error);
     }
 }
