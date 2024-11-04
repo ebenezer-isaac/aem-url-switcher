@@ -1,5 +1,3 @@
-//settings.js
-
 import { createServerItem } from './serverManager.js';
 import { getAvailableColor } from './colorPickers.js';
 import { getServers, saveServers, addServer, updateServer } from './storage.js';
@@ -10,9 +8,8 @@ async function init() {
     const nicknameInput = document.getElementById('nickname');
     const urlInput = document.getElementById('url');
     const addServerButton = document.getElementById('add-server');
-    const servers = await getServers(); // Load servers from storage
 
-    Object.values(servers).forEach((server) => createServerItem(server));
+    await refreshServerList(); // Load servers on page load
 
     addServerButton.addEventListener('click', () => handleAddOrEditServer(nicknameInput, urlInput));
 }
@@ -20,6 +17,7 @@ async function init() {
 async function handleAddOrEditServer(nicknameInput, urlInput) {
     const nickname = nicknameInput.value.trim();
     const url = urlInput.value.trim();
+    const addServerButton = document.getElementById('add-server');
 
     if (nickname && url) {
         const isEditMode = nicknameInput.dataset.editMode === 'true'; // Check if edit mode
@@ -36,12 +34,16 @@ async function handleAddOrEditServer(nicknameInput, urlInput) {
         nicknameInput.removeAttribute('data-edit-mode');
         nicknameInput.removeAttribute('data-server-id');
 
-        // Refresh server list without page reload
-        refreshServerList();
+        // Revert button text to "Add Server" after saving changes
+        addServerButton.innerHTML = '<span class="material-icons">add</span> &nbsp; Add Server';
+
+        // Refresh server list to reflect changes
+        await refreshServerList();
     } else {
         alert('Please fill in both fields.');
     }
 }
+
 
 async function updateServerDetails(nickname, url, serverId) {
     const servers = await getServers();
@@ -50,7 +52,6 @@ async function updateServerDetails(nickname, url, serverId) {
         existingServer.nickname = nickname;
         existingServer.url = url;
         await updateServer(existingServer); // Save updated server details
-        refreshServerList(); // Refresh without reloading
     }
 }
 
@@ -69,13 +70,11 @@ async function createNewServer(nickname, url) {
         tabGroupId: null // Initialize with no tab group ID
     };
     await addServer(newServer);
-    createServerItem(newServer);
 }
 
-function refreshServerList() {
+async function refreshServerList() {
     const serverList = document.getElementById('server-list');
     serverList.innerHTML = ''; // Clear existing items
-    getServers().then((servers) =>
-        Object.values(servers).forEach((server) => createServerItem(server))
-    );
+    const servers = await getServers();
+    Object.values(servers).forEach((server) => createServerItem(server));
 }

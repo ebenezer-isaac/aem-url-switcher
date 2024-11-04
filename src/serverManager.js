@@ -14,6 +14,7 @@ export class Server {
     static generateUniqueId() {
         return `server_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
     }
+
     static async loadServers() {
         const servers = await Storage.getServers();
         return Object.values(servers).map(
@@ -91,22 +92,12 @@ function handleEdit(nicknameElem, urlElem, serverId, color) {
     const urlInput = document.getElementById('url');
     const addServerButton = document.getElementById('add-server');
 
+    // Set input values and enable edit mode
     nicknameInput.value = nicknameElem.value;
     urlInput.value = urlElem.value;
+    nicknameInput.dataset.editMode = 'true'; // Set edit mode flag
+    nicknameInput.dataset.serverId = serverId; // Store server ID in dataset
+
+    // Change button label to indicate save action
     addServerButton.innerHTML = '<span class="material-icons">save</span> &nbsp; Save Changes';
-
-    nicknameElem.disabled = false;
-    urlElem.disabled = false;
-
-    addServerButton.onclick = async() => {
-        const updatedServer = new Server(
-            serverId,
-            nicknameInput.value,
-            urlInput.value,
-            color // Retain the original color
-        );
-        await Storage.updateServer(updatedServer);
-
-        location.reload(); // Reload to reflect changes or implement a targeted update
-    };
 }
