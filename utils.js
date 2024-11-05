@@ -12,7 +12,7 @@ export function constructNewUrl(baseUrl, currentPath, mode) {
     } else if (mode === 'Publish') {
         newUrl = `${normalizedBaseUrl}/${normalizedPath}.html?wcmmode=disabled`;
     } else if (mode === 'CRXDE') {
-        newUrl = `${normalizedBaseUrl}/crx/de/index.jsp#${normalizedPath}`;
+        newUrl = `${normalizedBaseUrl}/crx/de/index.jsp#/${normalizedPath}`;
     }
 
     // Remove any accidental double slashes in the constructed URL, except after "http(s):"
