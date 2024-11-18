@@ -22,17 +22,20 @@ export function constructNewUrl(baseUrl, currentPath, mode) {
 
 export async function getCurrentPath() {
     const [currentTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    let currentPath = currentTab.url.split('://')[1].split('/');
-    currentPath.shift();
+    if (!currentTab || !currentTab.url) {
+        throw new Error('Unable to retrieve the current tab URL');
+    }
 
-    return (
-        '/' +
-        currentPath
-        .join('/')
-        .replace(/^editor\.html\//, '')
-        .replace(/^crx\/de\/index.jsp#/, '')
-        .replace(/\.html(\?wcmmode=disabled)?$/, '')
-    );
+    let urlPath = currentTab.url.split('://')[1];
+    urlPath = urlPath.substring(urlPath.indexOf('/'));
+
+    const currentPath = urlPath
+        .replace(/^\/editor\.html\/?/, '/')
+        .replace(/^\/crx\/de\/index.jsp#\/?/, '/')
+        .replace(/\.html(\?[^#]*)?(#.*)?$/, '')
+        .replace(/\/+$/, '');
+
+    return currentPath;
 }
 
 export function getCurrentMode(url) {
