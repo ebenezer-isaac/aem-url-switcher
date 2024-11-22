@@ -12,7 +12,11 @@ A Chrome extension designed to enhance AEM development by allowing easy switchin
    - **Switch to Publish**: `Ctrl+Shift+Z`
    - **Switch to CRX DE**: `Ctrl+Shift+X`
 
-## Installation
+## Public Installation
+1. Install the extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/aem-url-switcher/cieeolllkkhbhmiijibndgfdlhhgdfhb).
+2. Follow the setup process explained in this [YouTube video](https://www.youtube.com/watch?v=mALlCax6Dy0).
+
+## Developer Installation
 1. Clone this repository: `git clone https://github.com/your-repo/aem-url-switcher.git`
 2. Open Chrome and go to `chrome://extensions/`.
 3. Enable **Developer mode**.
